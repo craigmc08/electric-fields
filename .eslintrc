@@ -1,0 +1,14 @@
+{
+    "parser": "babel-eslint",
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "shared-node-browser": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "no-unused-vars": "warn"
+    }
+}

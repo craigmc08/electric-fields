@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Electric Fields</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: 'Roboto', 'Arial', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #efefef;
+            }
+            #canvas-holder {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: grid;
+            }
+            #canvas {
+                justify-self: center;
+                align-self: center; 
+                border-radius: 8px;
+                box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6);
+                /* filter: blur(10px); */
+                height: auto;
+                max-width: 1280px;
+            }
+
+            #handles-holder {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: grid;
+                background: rgba(0, 0, 0, 0);
+            }
+            #handles {
+                --canvas-width: 1280px;
+                --canvas-height: 720px;
+
+                position: relative;
+                justify-self: center;
+                align-self: center;
+                background: rgba(0, 0, 0, 0);
+                width: var(--canvas-width);
+                height: var(--canvas-height);
+            }
+            .handle {
+                --x: 0px;
+                --y: 0px;
+                --size: 16px;
+                --symbol: '';
+
+                position: absolute;
+                top: calc(var(--y) - var(--size) / 2);
+                left: calc(var(--x) - var(--size) / 2);
+                width: var(--size);
+                height: var(--size);
+                border-radius: 100%;
+                background-color: white;
+                border: solid 2px black;
+
+                cursor: move;
+            }
+            .handle::after {
+                content: var(--symbol);
+                display: block;
+                position: relative;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                text-align: center;
+            }
+            .handle:hover {
+                border-color: red;
+            }
+
+            #settings {
+                position: absolute;
+                left: 16px;
+                right: 16px;
+                top: 0;
+            }
+            .settings-inner {
+                background-color: white;
+                padding: 16px;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+
+                display: flex;
+            }
+            .input {
+                padding-right: 16px;
+                border-right: 2px solid rgba(0, 0, 0, 0.2);
+                margin-right: 16px;
+            }
+            .input:last-child {
+                border-right: none;
+                margin-right: none;
+                padding-right: none;
+            }
+            button, select {
+                background-color: white;
+                border: 1px solid rgba(0, 0, 0, 0.5);
+                padding: 8px;
+                font-size: 16px;
+                border-radius: 8px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                outline: none;
+                transition: box-shadow 250ms;
+            }
+            button:hover, select:hover, button:focus, select:focus {
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+            label::after {
+                content: ':';
+            }
+
+            #info {
+                position: absolute;
+                bottom: 16px;
+                left: 16px;
+                background-color: rgba(255, 255, 255, 1);
+                border-radius: 8px;
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+                width: 275px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #info p {
+                margin: 0;
+                margin-bottom: 0.5em;
+                color: rgba(0, 0, 0, 0.8);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="canvas-holder">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="handles-holder">
+            <div id="handles">
+            </div>
+        </div>
+
+        <div id="settings">
+            <div class="settings-inner">
+                <div class="input">
+                    <label for="resolution">Resolution</label>
+                    <select name="resolution" id="resolution">
+                        <option value=1>1 (Best Quality)</option>
+                        <option value=2>2 (Great Quality)</option>
+                        <option value=5>5 (Good Quality)</option>
+                        <option selected="selected" value=10>10 (Okay Quality)</option>
+                        <option value=16>16 (Worst Quality)</option>
+                    </select>
+                </div>
+                <div class="input">
+                    <button id="add-point">Add Point</button>
+                </div>
+                <div class="input">
+                    <button id="remove-point">Remove Point</button>
+                </div>
+            </div>
+        </div>
+        <div id="info">
+            <p>pixel brightness: strength of field</p>
+            <p>pixel color: direction (see below)</p>
+            <img src="color-wheel.png" width="128" height="auto" />
+        </div>
+    </body>
+</html>
