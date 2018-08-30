@@ -1,6 +1,8 @@
 # electric fields
 a web page that visualizes electric fields.
 
+You can see it working here: https://craigmc08.github.io/electric-fields/
+
 ### Development
 Clone the repo
 ```sh
