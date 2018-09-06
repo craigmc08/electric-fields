@@ -1,22 +1,140 @@
-const Vector = (x, y) => ({ x: x, y: y });
-const V = Vector;
+export default class Vector {
+    /**
+     * @constructor
+     * Creates a new vector
+     * @param {number} x The x component of the vector
+     * @param {number} y The y component of the vector
+     */
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    /**
+     * Creates a vector with an angle and length
+     * @param {number} angle Angle (in radians) of vector counter-clockwise from x-axis
+     * @param {number} length Length of the vector
+     * @returns {Vector}
+     */
+    static FromAngle(angle, length=1) {
+        return new Vector(Math.cos(angle) * length, Math.sin(angle) * length);
+    }
 
-const Add = Vector.Add = ({ x: x1, y: y1 }, { x: x2, y: y2 }) => V(x1 + x2, y1 + y2);
-const Subtract = Vector.Subtract = ({ x: x1, y: y1 }, { x: x2, y: y2 }) => V(x1 - x2, y1 - y2);
+    /**
+     * Adds another vector to this one
+     * @param {number} other A vector to add to this one
+     * @returns {Vector}
+     */
+    add({ x , y }) {
+        return new Vector(this.x + x, this.y + y);
+    }
+    /**
+     * Subtracts another vector from this one
+     * @param {number} other A vector to subtract from this one
+     * @returns {Vector}
+     */
+    subtract({ x, y }) {
+        return new Vector(this.x - x, this.y - y);
+    }
 
-const Scale = Vector.Scale = ({ x, y }, i, j) => j === undefined ? V(x * i, y * i) : V(x * i, y * j);
-const Dot = Vector.Dot = ({ x: x1, y: y1 }, { x: x2, y: y2 }) => x1 * x2 + y1 * y2;
+    /**
+     * Scales x and y components of vector individually
+     * @param {number} i Scale for x
+     * @param {number} j Scale for y
+     * @returns {Vector}
+     */
+    scaleXY(i, j) {
+        return new Vector(this.x * i, this.y * j);
+    }
+    /**
+     * Scales vector uniformly on x and y
+     * @param {number} i Scalar to multiply vector by
+     * @return {Vector}
+     */
+    scale(i) {
+        return this.scaleXY(i, i);
+    }
+    /**
+     * Computes the dot product of this and another vector
+     * @param {Vector} other Vector to dot product with
+     * @returns {number}
+     */
+    dot({ x, y }) {
+        return this.x * x + this.y * y;
+    }
+    /**
+     * Rotates this vector by specified angle (positive = counter-clockwise)
+     * @param {number} angle Angle (in radians) to rotate vector by
+     * @returns {Vector}
+     */
+    rotate(angle) {
+        const base_angle = Math.atan2(this.y, this.x);
+        const new_angle = base_angle + angle;
+        const length = this.mag();
+        return new Vector(Math.cos(new_angle) * length, Math.sin(new_angle) * length);
+    }
+    /**
+     * Sets the angle (counter-clockwise from x-axis) of the vector
+     * @param {number} angle Angle (in radians)
+     * @returns {Vector}
+     */
+    setAngle(angle) {
+        const length = this.mag();
+        return new Vector(Math.cos(angle) * length, Math.sign(angle) * length);
+    }
+    /**
+     * Computes the angle of the vector
+     * @returns {number} Angle in radians
+     */
+    angle() {
+        return Math.atan2(this.y, this.x);
+    }
 
-const FromAngle = Vector.FromAngle = (a) => V(Math.cos(a), Math.sin(a));
-const Angle = Vector.Angle = ({ x, y }) => Math.atan2(y, x);
+    /**
+     * Computes the square of the magnitude of the vector (faster)
+     * @returns {number}
+     */
+    sqrMag() {
+        return this.x * this.x + this.y * this.y;
+    }
+    /**
+     * Computes the magnitude of the vector (slower)
+     * @returns {number}
+     */
+    mag() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+    /**
+     * Normalizes the vector (same direction, length of 1)
+     * @returns {Vector}
+     */
+    normalize() {
+        return this.scale(1 / this.mag());
+    }
 
-const SqrMag = Vector.SqrMag = ({ x, y }) => x*x + y*y;
-const Mag = Vector.Mag = (v) => Math.sqrt(SqrMag(v));
-const SqrDist = Vector.SqrDist = (v1, v2) => SqrMag(Subtract(v1, v2));
-const Dist = Vector.Dist = (v1, v2) => Mag(Subtract(v1, v2));
+    /**
+     * Computes the square of the distance between the 2 vectors (faster)
+     * @param {Vector} v1 First vector
+     * @param {Vector} v2 Second vector
+     * @returns {number}
+     */
+    static SqrDist(v1, v2) {
+        return v1.subtract(v2).sqrMag();
+    }
+    /**
+     * Computes the distance between the 2 vectors (slower)
+     * @param {Vector} v1 
+     * @param {Vector} v2 
+     * @returns {number}
+     */
+    static Dist(v1, v2) {
+        return v1.subtract(v2).mag();
+    }
 
-const Normalize = Vector.Normalize = (v) => Scale(v, (1 / Mag(v)));
-
-const Copy = Vector.Copy = ({ x, y }) => V(x, y);
-
-export default Vector;
+    /**
+     * Returns a copy of this vector
+     * @returns {Vector}
+     */
+    copy() {
+        return new Vector(this.x, this.y);
+    }
+}

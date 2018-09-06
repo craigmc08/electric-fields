@@ -3,16 +3,13 @@ import Random from './Random';
 import P from './PointCharge';
 import { hsl, hslToRgb } from './util';
 import Handle from './Handle';
+import ColorField from './Renderer/ColorField';
+import FieldLines from './Renderer/FieldLines';
 
 const width = 1280;
 const height = 720;
 const HANDLE_SIZE = 15;
 const HANDLE_SIZE_MULT = 3;
-
-let FIELD_BLOCK_SIZE = 10;
-const FIELD_DISPLAY_MULT = 0.015;
-const FIELD_DISPLAY_POWER = 0.5;
-const FIELD_MAG_TIERS = 100;
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -21,16 +18,40 @@ canvas.height = height;
 
 const points = [];
 const handles = [];
-// const selectedPoint = -1;
+const selection = new Proxy({ selected: -1 }, {
+    get: (target, prop) => {
+        if (prop === 'select') {
+            return i => {
+                target.selected = i;
+                if (handles[i] !== undefined) handles[i].select();
+            };
+        } else if (prop === 'deselect') {
+            return () => {
+                target.selected = -1;
+                handles.forEach(handle => handle.deselect());
+            }
+        } else {
+            return target[prop];
+        }
+    },
+});
 
-const resolutionInput = document.getElementById('resolution');
 const addPointButton = document.getElementById('add-point');
-const removePointButton = document.getElementById('remove-point');
+const removePointButton = document.getElementById('remove-point')
 
-function createPointCharge(i) {
-    const charge = Random.Range(1, 3) * (i % 2 == 0 ? 1 : -1);
-    const v = Random.Position(0, width, 0, height);
-    const p = P(v, charge);
+function createPointCharge(i, pointCharge=undefined) {
+    let charge;
+    let v;
+    let p;
+    if (pointCharge === undefined) {
+        charge = Random.Sign(Random.RangeInt(1, 4));
+        v = Random.Position(0, width, 0, height);
+        p = new P(v, charge);
+    } else {
+        charge = pointCharge.charge;
+        v = pointCharge.pos;
+        p = pointCharge;
+    }
     points.push(p);
 
     const handle = new Handle(charge > 0 ? '+' : '-',
@@ -40,24 +61,30 @@ function createPointCharge(i) {
         width, height
     );
     const index = i;
-    handle.on('move', ({ rapid, x, y }) => {
-        points[i] = P(V(x, y), points[index].charge, points[index].v);
+    handle.on('move', ({ x, y }) => {
+        points[i] = new P(new V(x, y), points[index].charge, points[index].v);
         drawStuff();
+    });
+    handle.on('click', () => {
+        selection.select(i);
+    });
+    handle.on('declick', () => {
+        selection.deselect(i);
     });
     handles.push(handle);
 }
 
 function setup() {
-    for (let i = 0; i < 4; i++) {
-        createPointCharge(i);
-    }
+    // for (let i = 0; i < 4; i++) {
+    //     createPointCharge(i);
+    // }
+    const x1 = width / 2 - width / 4;
+    const x2 = width / 2 + width / 4;
+    const y = height / 2;
+    createPointCharge(0, new P(new V(x1, y), 3));
+    createPointCharge(1, new P(new V(x2, y), 3));
+    createPointCharge(2, new P(new V(width / 2, height / 2 ), -3));
 
-    resolutionInput.addEventListener('change', () => {
-        const value = resolutionInput.value;
-        const res = parseInt(value);
-        FIELD_BLOCK_SIZE = res;
-        drawStuff();
-    });
     addPointButton.addEventListener('click', () => {
         createPointCharge(points.length);
         drawStuff();
@@ -80,46 +107,8 @@ function draw() {
 }
 
 function drawStuff() {
-    ctx.clearRect(0, 0, width, height);
-    
-    ctx.fillStyle = 'rgb(0, 0, 0)';
-    ctx.fillRect(0, 0, width, height);
-
-    let i = 0;
-    const pixels = new Uint8ClampedArray(width * height * 4)
-    for (let y = 0; y < height; y += FIELD_BLOCK_SIZE) {
-        for (let x = 0; x < width ; x += FIELD_BLOCK_SIZE) {
-            let field = V(0, 0);
-            const pos = V(x, y);
-            points.forEach(point => {
-                field = V.Add(field, P.Field(pos, point));
-            });
-            const a = V.Angle(field);
-            const a_pos = a < 0 ? Math.PI * 2 + a : a;
-            const a_8bit = Math.floor(a_pos / Math.PI * 180);
-            const hue = (a_8bit + 180) % 360;
-
-            const mag = V.Mag(field);
-            let v =  Math.pow(mag, FIELD_DISPLAY_POWER) * FIELD_DISPLAY_MULT;
-            v = Math.floor(v / (100 / FIELD_MAG_TIERS)) * (100 / FIELD_MAG_TIERS);
-            const [r, g, b] = hslToRgb(hue / 360, 100 / 100, v / 100);
-
-            for (let j = 0; j < FIELD_BLOCK_SIZE; j++) {
-                for (let k = 0; k < FIELD_BLOCK_SIZE; k++) {
-                    const l = 4 * (j * width + k);
-                    pixels[i + l] = r;
-                    pixels[i + l + 1] = g;
-                    pixels[i + l + 2] = b;
-                    pixels[i + l + 3] = 255;
-                }
-            }
-
-            i += FIELD_BLOCK_SIZE * 4;
-        }
-        i += FIELD_BLOCK_SIZE * width * 4 - 4 * width;
-    }
-    const imageData = new ImageData(pixels, width, height);
-    ctx.putImageData(imageData, 0, 0);
+    // ColorField(ctx, points);
+    FieldLines(ctx, points);
 }
 
 let lastFrameTime = Date.now();

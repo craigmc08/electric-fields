@@ -25,7 +25,6 @@
                 align-self: center; 
                 border-radius: 8px;
                 box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6);
-                /* filter: blur(10px); */
                 height: auto;
                 max-width: 1280px;
             }
@@ -79,6 +78,11 @@
             }
             .handle:hover {
                 border-color: red;
+            }
+            .handle[data-selected=true] {
+                border-color: dodgerblue !important;
+                border-width: 2px;
+                box-shadow: 0 0 25px dodgerblue;
             }
 
             #settings {
@@ -145,7 +149,7 @@
     </head>
     <body>
         <div id="canvas-holder">
-            <canvas id="canvas"></canvas>
+            <canvas id="canvas" draggable=false></canvas>
         </div>
         <div id="handles-holder">
             <div id="handles">
@@ -154,16 +158,6 @@
 
         <div id="settings">
             <div class="settings-inner">
-                <div class="input">
-                    <label for="resolution">Resolution</label>
-                    <select name="resolution" id="resolution">
-                        <option value=1>1 (Best Quality)</option>
-                        <option value=2>2 (Great Quality)</option>
-                        <option value=5>5 (Good Quality)</option>
-                        <option selected="selected" value=10>10 (Okay Quality)</option>
-                        <option value=16>16 (Worst Quality)</option>
-                    </select>
-                </div>
                 <div class="input">
                     <button id="add-point">Add Point</button>
                 </div>

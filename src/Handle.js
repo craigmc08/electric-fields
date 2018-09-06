@@ -4,12 +4,14 @@ import Observable from './Observable';
 let handles = [];
 
 window.addEventListener('mousemove', e => {
-    e.preventDefault();
     handles.forEach(handle => handle.onMove.bind(handle)(e));
 });
 window.addEventListener('mouseup', e => {
-    e.preventDefault();
     handles.forEach(handle => handle.onStop.bind(handle)(e));
+});
+window.addEventListener('click', e => {
+    if (e.defaultPrevented) return;
+    handles.forEach(handle => handle.dispatch('declick'));
 });
 
 class Handle extends Observable {
@@ -39,6 +41,7 @@ class Handle extends Observable {
         this.renderPosition();
 
         this.el.addEventListener('mousedown', this.onStart.bind(this));
+        this.el.addEventListener('click', this.onClick.bind(this));
 
         this.handleHolder.appendChild(this.el);
 
@@ -50,7 +53,6 @@ class Handle extends Observable {
         this.my = this.y;
         this.moving = true;
     }
-
     onMove(e) {
         if(!this.moving) return;
         
@@ -60,10 +62,14 @@ class Handle extends Observable {
         // console.log(this.mx, this.my);
         this.updatePosition();
     }
-
     onStop() {
         this.moving = false;
         this.dispatch('move', { rapid: false, x: this.x, y: this.y });
+    }
+
+    onClick(e) {
+        e.preventDefault();
+        this.dispatch('click');
     }
 
     screenToCanvas(sx, sy) {
@@ -95,6 +101,13 @@ class Handle extends Observable {
         if (i == -1) return;
         if (i == handles.length) handles.pop();
         handles = [...handles.slice(0, i), ...handles.slice(i + 1)];
+    }
+
+    select() {
+        this.el.setAttribute('data-selected', true);
+    }
+    deselect() {
+        this.el.setAttribute('data-selected', false);
     }
 }
 

@@ -1,17 +1,43 @@
-import V from './Vector';
+import Vector from './Vector';
 
-const PointCharge = (p, charge, v=V(0, 0)) => ({ p, v, charge });
-const P = PointCharge;
+const k = 8.99e9;
+export default class PointCharge {
+    /**
+     * @constructor
+     * Creates a point charge at a position and charge
+     * @param {Vector} position 
+     * @param {number} charge Charge (in Coloumbs) of the point charge
+     */
+    constructor(position, charge) {
+        /** @member {Vector} pos Position */
+        this.pos = position;
+        /** @member {number} charge Charge (in Coloumbs)*/
+        this.charge = charge;
+    }
 
-const k = PointCharge.k = 8.99e9;
-const e0 = PointCharge.e0 = 8.85e-12;
+    /**
+     * Computes the magnitude of the electric field at a point (faster)
+     * @param {Vector} point The point to compute the field at
+     * @returns {number}
+     */
+    fieldMag(point) {
+        return k * this.charge / Vector.SqrDist(point, this.pos);
+    }
+    /**
+     * Computes the vector representing the electric field at a point
+     * @param {Vector} point The point to compute the field at
+     * @returns {Vector}
+     */
+    field(point) {
+        return point.subtract(this.pos).normalize().scale(this.fieldMag(point));
+    }
 
-const FieldMag = PointCharge.FieldMag = (point, { p, charge }) => k * charge / V.SqrDist(p, point);
-const Field = PointCharge.Field = (point, pc) => V.Scale(V.Normalize(V.Subtract(pc.p, point)), FieldMag(point, pc));
-
-const Force = PointCharge.Force = (p1, { p, charge }) => Field(p, p1) * charge;
-
-const ApplyForce = PointCharge.ApplyForce = dt => F => ({ p, charge, v }) => P(p, charge, V.Add(v, V.Scale(F, dt)));
-const Update = PointCharge.Update = dt => ({ p, charge, v }) => P(V.Add(p, V.Scale(v, dt)), charge, v);
-
-export default PointCharge;
+    /**
+     * Computes the electrostatic force on a point charge
+     * @param {PointCharge} other Point charge to compute the force for
+     */
+    force(other) {
+        return this.field(other.pos).scale(other.charge);
+    }
+}
+PointCharge.k = k;
