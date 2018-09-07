@@ -37,7 +37,12 @@ const selection = new Proxy({ selected: -1 }, {
 });
 
 const addPointButton = document.getElementById('add-point');
-const removePointButton = document.getElementById('remove-point')
+const removePointButton = document.getElementById('remove-point');
+
+const drawType0Radio = document.getElementById('d0');
+const drawType1Radio = document.getElementById('d1');
+
+let drawType = 0;
 
 function createPointCharge(i, pointCharge=undefined) {
     let charge;
@@ -81,9 +86,10 @@ function setup() {
     const x1 = width / 2 - width / 4;
     const x2 = width / 2 + width / 4;
     const y = height / 2;
+    const y2 = height / 2 - height / 4;
     createPointCharge(0, new P(new V(x1, y), 3));
     createPointCharge(1, new P(new V(x2, y), 3));
-    createPointCharge(2, new P(new V(width / 2, height / 2 ), -3));
+    // createPointCharge(2, new P(new V(width / 2, height / 2 ), -3));
 
     addPointButton.addEventListener('click', () => {
         createPointCharge(points.length);
@@ -99,6 +105,14 @@ function setup() {
         drawStuff();
     });
 
+    const updateDrawType = e => {
+        drawType = parseInt(e.target.value);
+        drawStuff();
+    };
+
+    drawType0Radio.addEventListener('click', updateDrawType);
+    drawType1Radio.addEventListener('click', updateDrawType);
+
     drawStuff();
 }
 
@@ -107,8 +121,11 @@ function draw() {
 }
 
 function drawStuff() {
-    // ColorField(ctx, points);
-    FieldLines(ctx, points);
+    if (drawType == 0) {
+        ColorField(ctx, points);
+    } else if (drawType == 1) {
+        FieldLines(ctx, points);
+    }
 }
 
 let lastFrameTime = Date.now();

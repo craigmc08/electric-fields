@@ -104,11 +104,22 @@
                 padding-right: 16px;
                 border-right: 2px solid rgba(0, 0, 0, 0.2);
                 margin-right: 16px;
+                display: flex;
+                align-items: center;
             }
             .input:last-child {
                 border-right: none;
                 margin-right: none;
                 padding-right: none;
+            }
+            .input h1 {
+                display: inline-block;
+                font-size: 18px;
+                margin: 0;
+                padding: 0;
+            }
+            .input input[type=radio] {
+                margin-right: 16px;
             }
             button, select {
                 background-color: white;
@@ -163,6 +174,13 @@
                 </div>
                 <div class="input">
                     <button id="remove-point">Remove Point</button>
+                </div>
+                <div class="input">
+                    <h1>Style:&nbsp;</h1>
+                    <label for="d0">Colors</label>
+                    <input id="d0" checked type="radio" name="draw-type" value="0">
+                    <label for="d1">Lines</label>
+                    <input id="d1" type="radio" name="draw-type" value="1">
                 </div>
             </div>
         </div>

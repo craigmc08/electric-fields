@@ -31,6 +31,14 @@ export default class PointCharge {
     field(point) {
         return point.subtract(this.pos).normalize().scale(this.fieldMag(point));
     }
+    /**
+     * Computes the vector representing the electric field, but assuming all charges are +
+     * @param {Vector} point
+     * @returns {Vector}
+     */
+    fieldPositive(point) {
+        return point.subtract(this.pos).normalize().scale(Math.abs(this.fieldMag(point)));
+    }
 
     /**
      * Computes the electrostatic force on a point charge
