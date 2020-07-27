@@ -1,20 +1,26 @@
 import V from './Vector';
 import Random from './Random';
 import P from './PointCharge';
-import { hsl, hslToRgb } from './util';
+import { hsl } from './util';
 import Handle from './Handle';
 import ColorField from './Renderer/ColorField';
 import FieldLines from './Renderer/FieldLines';
+import VectorField from './Renderer/VectorField';
+import PotentialField from './Renderer/PotentialField';
+import debounce from './debounce';
 
-const width = 1280;
-const height = 720;
+import CanvasGraph from './canvas-graph';
+const cg = new CanvasGraph(document.getElementById('graph-holder'), {
+    fullsize: true,
+});
+
+const canvas = cg.canvas;
+const ctx = canvas.getContext('2d');
+
+const width = canvas.width;
+const height = canvas.height;
 const HANDLE_SIZE = 15;
 const HANDLE_SIZE_MULT = 3;
-
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = width;
-canvas.height = height;
 
 const points = [];
 const handles = [];
@@ -41,6 +47,8 @@ const removePointButton = document.getElementById('remove-point');
 
 const drawType0Radio = document.getElementById('d0');
 const drawType1Radio = document.getElementById('d1');
+const drawType2Radio = document.getElementById('d2');
+const drawType3Radio = document.getElementById('d3');
 
 let drawType = 0;
 
@@ -66,10 +74,10 @@ function createPointCharge(i, pointCharge=undefined) {
         width, height
     );
     const index = i;
-    handle.on('move', ({ x, y }) => {
+    handle.on('move', debounce(50, ({ x, y }) => {
         points[i] = new P(new V(x, y), points[index].charge, points[index].v);
         drawStuff();
-    });
+    }));
     handle.on('click', () => {
         selection.select(i);
     });
@@ -86,9 +94,9 @@ function setup() {
     const x1 = width / 2 - width / 4;
     const x2 = width / 2 + width / 4;
     const y = height / 2;
-    const y2 = height / 2 - height / 4;
+    // const y2 = height / 2 - height / 4;
     createPointCharge(0, new P(new V(x1, y), 3));
-    createPointCharge(1, new P(new V(x2, y), 3));
+    createPointCharge(1, new P(new V(x2, y), -3));
     // createPointCharge(2, new P(new V(width / 2, height / 2 ), -3));
 
     addPointButton.addEventListener('click', () => {
@@ -112,33 +120,26 @@ function setup() {
 
     drawType0Radio.addEventListener('click', updateDrawType);
     drawType1Radio.addEventListener('click', updateDrawType);
+    drawType2Radio.addEventListener('click', updateDrawType);
+    drawType3Radio.addEventListener('click', updateDrawType);
 
     drawStuff();
 }
 
-function draw() {
-
-}
-
 function drawStuff() {
     if (drawType == 0) {
-        ColorField(ctx, points);
+        ColorField(cg, points);
     } else if (drawType == 1) {
-        FieldLines(ctx, points);
+        FieldLines(cg, points);
+    } else if (drawType == 2) {
+        VectorField(cg, points);
+    } else if (drawType == 3) {
+        PotentialField(cg, points);
     }
-}
-
-let lastFrameTime = Date.now();
-function loop() {
-    const dt = (Date.now() - lastFrameTime) / 1000;
-    lastFrameTime = Date.now();
-    draw(dt);
-    requestAnimationFrame(loop);
 }
 
 window.onload = () => {
     setTimeout(() => {
         setup();
-        loop();
-    }, 1);
+    }, 0);
 };

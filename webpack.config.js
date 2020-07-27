@@ -33,6 +33,6 @@ module.exports = {
     }),
   ],
   devServer: {
-    contentBase: './bundle',
-    },
+    contentBase: './public',
+  },
 };

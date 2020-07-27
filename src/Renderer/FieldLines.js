@@ -1,6 +1,12 @@
 import Vector from "../Vector";
 
-export default function Render(ctx, points) {
+/**
+ * 
+ * @param {CanvasGraph} ctx 
+ * @param {Vector[]} points 
+ */
+export default function Render(cg, points) {
+    const ctx = cg.ctx;
     const { width, height } = ctx.canvas;
 
     const pixels = (new Uint8ClampedArray(width * height * 4))

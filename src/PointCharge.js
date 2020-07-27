@@ -41,6 +41,23 @@ export default class PointCharge {
     }
 
     /**
+     * Computes the normalized direction vector of the field
+     * @param {Vector} point
+     * @returns {Vector}
+     */
+    fieldDir(point) {
+        point.subtract(this.pos).normalize();
+    }
+
+    /**
+     * Computes the potential at a point due to this point charge
+     * @param {Vector} point 
+     */
+    potential(point) {
+        return k * this.charge / Vector.Dist(point, this.pos);
+    }
+
+    /**
      * Computes the electrostatic force on a point charge
      * @param {PointCharge} other Point charge to compute the force for
      */
