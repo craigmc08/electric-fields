@@ -46,16 +46,17 @@ body, main, #graph, #graph-holder, #handles-holder {
   border: solid 2px black;
 
   cursor: move;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 .handle::after {
   content: var(--symbol);
   display: block;
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  align-self: center;
   text-align: center;
+  font-weight: bold;
 }
 .handle:hover {
   border-color: red;
@@ -64,4 +65,9 @@ body, main, #graph, #graph-holder, #handles-holder {
   border-color: dodgerblue !important;
   border-width: 2px;
   box-shadow: 0 0 25px dodgerblue;
+}
+
+.dg {
+  font-family: 'Roboto', 'Arial', sans-serif !important;
+  font-size: 16px !important;
 }

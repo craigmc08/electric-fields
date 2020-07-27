@@ -3,28 +3,26 @@ import Observable from './Observable';
 
 let handles = [];
 
+const handleHolder = document.getElementById('handles-holder');
 window.addEventListener('mousemove', e => {
     handles.forEach(handle => handle.onMove.bind(handle)(e));
 });
 window.addEventListener('mouseup', e => {
     handles.forEach(handle => handle.onStop.bind(handle)(e));
 });
-window.addEventListener('click', e => {
+handleHolder.addEventListener('click', e => {
     if (e.defaultPrevented) return;
     handles.forEach(handle => handle.dispatch('declick'));
 });
 
 class Handle extends Observable {
-    constructor(symbol, x, y, size, color, width, height) {
+    constructor(x, y, settings, width, height) {
         super();
 
         this.handleHolder = document.getElementById('handles');
 
-        this.symbol = symbol;
-
         this.x = x;
         this.y = y;
-        this.size;
 
         this.width = width;
         this.height = height;
@@ -34,10 +32,7 @@ class Handle extends Observable {
         this.moving = false;
 
         this.el = document.createElement('div');
-        this.el.style.setProperty('--symbol', `'${symbol}'`);
-        this.el.style.setProperty('--size', `${size}px`);
-        this.el.style.backgroundColor = color;
-        this.el.classList = 'handle';
+        this.updateSettings(settings);
         this.renderPosition();
 
         this.el.addEventListener('mousedown', this.onStart.bind(this));
@@ -48,10 +43,19 @@ class Handle extends Observable {
         handles.push(this);
     }
 
+    updateSettings({ symbol, size, color }) {
+        console.log(symbol, size, color);
+        this.el.style.setProperty('--symbol', `'${symbol}'`);
+        this.el.style.setProperty('--size', `${size}px`);
+        this.el.style.backgroundColor = color;
+        this.el.classList = 'handle';
+    }
+
     onStart() {
         this.mx = this.x;
         this.my = this.y;
         this.moving = true;
+        this.dispatch('click');
     }
     onMove(e) {
         if(!this.moving) return;
@@ -69,7 +73,6 @@ class Handle extends Observable {
 
     onClick(e) {
         e.preventDefault();
-        this.dispatch('click');
     }
 
     screenToCanvas(sx, sy) {
@@ -89,7 +92,6 @@ class Handle extends Observable {
         if (changed) this.renderPosition();
     }
     renderPosition() {
-        // console.log(this.x, this.y);
         this.el.style.setProperty('--x', `${this.x}px`);
         this.el.style.setProperty('--y', `${this.y}px`);
         this.dispatch('move', { rapid: true, x: this.x, y: this.y });
