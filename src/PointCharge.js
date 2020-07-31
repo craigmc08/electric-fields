@@ -1,6 +1,10 @@
 import Vector from './Vector';
 
-const k = 8.99e9;
+const k = 9e9;
+/**
+ * Technically this isn't a point charge anymore, but a small circular charge
+ * to avoid problematic infinity discontinuities
+ */
 export default class PointCharge {
     /**
      * @constructor
@@ -13,6 +17,21 @@ export default class PointCharge {
         this.pos = position;
         /** @member {number} charge Charge (in Coloumbs)*/
         this.charge = charge;
+
+        /** @member {number} radius Radius */
+
+        /** @member {number} _radius Private radius, dont modify directly */
+        this._radius = 2;
+        /** @member {number} sqrRadius Radius squared */
+        this.sqrRadius = this.radius * this.radius;
+    }
+
+    set radius(value) {
+        this._radius = value;
+        this.sqrRadius = value * value;
+    }
+    get radius() {
+        return this._radius;
     }
 
     /**
@@ -21,7 +40,9 @@ export default class PointCharge {
      * @returns {number}
      */
     fieldMag(point) {
-        return k * this.charge / Vector.SqrDist(point, this.pos);
+        const sqrDist = Vector.SqrDist(point, this.pos);
+        if (sqrDist < this.sqrRadius) return 0;
+        return k * this.charge / sqrDist;
     }
     /**
      * Computes the vector representing the electric field at a point
@@ -54,7 +75,8 @@ export default class PointCharge {
      * @param {Vector} point 
      */
     potential(point) {
-        return k * this.charge / Vector.Dist(point, this.pos);
+        const dist = Math.max(Vector.Dist(point, this.pos), this.radius);
+        return k * this.charge / dist;
     }
 
     /**

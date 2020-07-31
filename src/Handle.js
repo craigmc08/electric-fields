@@ -44,7 +44,6 @@ class Handle extends Observable {
     }
 
     updateSettings({ symbol, size, color }) {
-        console.log(symbol, size, color);
         this.el.style.setProperty('--symbol', `'${symbol}'`);
         this.el.style.setProperty('--size', `${size}px`);
         this.el.style.backgroundColor = color;

@@ -57,3 +57,43 @@ export function hslToRgb(h, s, l){
 
    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
+
+/**
+ * Checks whether every pair of elements from the arrays satisfy the predicate
+ * `f`
+ * 
+ * @param {(a: T, b: T) => boolean} f 
+ * @param {T[]} arr1 
+ * @param {T[]} arr2 
+ */
+export function arraysEqualBy(f, arr1, arr2) {
+    if (!Array.isArray(arr1) || !Array.isArray(arr2)) return false;
+    if (arr1.length !== arr2.length) return false;
+    return arr1.every((v, i) => f(v, arr2[i]));
+}
+
+/**
+ * Deeply copies an object
+ * 
+ * @param {any} obj 
+ * @param {any} visited 
+ */
+export function deepCopy(obj) {
+    if (Array.isArray(obj)) {
+        const newArray = [];
+        for (let i = 0; i < obj.length; i++) {
+            newArray[i] = deepCopy(obj[i]);
+        }
+        return newArray;
+    } else if (typeof obj === 'object') {
+        const newObj = Object.create(obj.__proto__);
+        const entries = Object.entries(obj);
+        entries.forEach(([k, v]) => {
+            newObj[k] = deepCopy(v)
+        });
+        return newObj;
+    } else {
+        // Primitive
+        return obj;
+    }
+}

@@ -1,9 +1,17 @@
 /* eslint-disable no-unused-vars */
+
+function setupGui() { }
+
 /**
  * 
  * @param {CanvasGraph} ctx 
  * @param {Vector[]} points 
  */
-export default function Render(cg, points) {
+function render(cg, points) {
     return;
+}
+
+export {
+    render,
+    setupGui
 }

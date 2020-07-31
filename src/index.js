@@ -2,10 +2,12 @@ import V from './Vector';
 import P from './PointCharge';
 import { hsl } from './util';
 import Handle from './Handle';
-import ColorField from './Renderer/ColorField';
-import FieldLines from './Renderer/FieldLines';
-import VectorField from './Renderer/VectorField';
-import PotentialField from './Renderer/PotentialField';
+import * as ColorField from './Renderer/ColorField';
+import * as FieldLines from './Renderer/FieldLines';
+import * as VectorField from './Renderer/VectorField';
+import * as PotentialField from './Renderer/PotentialField';
+import * as EquipotentialLines from './Renderer/EquipotentialLines';
+import * as StreamField from './Renderer/StreamField';
 import debounce from './debounce';
 import * as dat from 'dat.gui';
 import CanvasGraph from './canvas-graph';
@@ -17,7 +19,22 @@ const styles = {
     lines: 'lines',
     vectors: 'vectors',
     potential: 'potential',
+    equipotential: 'equipotential',
+    stream: 'stream',
 };
+
+function getRenderer(style) {
+    return {
+        [styles.colors]: ColorField,
+        [styles.lines]: FieldLines,
+        [styles.vectors]: VectorField,
+        [styles.potential]: PotentialField,
+        [styles.equipotential]: EquipotentialLines,
+        [styles.stream]: StreamField,
+    }[style];
+}
+
+const defaultStyle = styles.stream;
 
 const cg = new CanvasGraph(document.getElementById('graph-holder'), {
     fullsize: true,
@@ -66,15 +83,7 @@ function createPointCharge(pointCharge) {
 
 function drawStuff() {
     const drawType = ef.style;
-    if (drawType == styles.colors) {
-        ColorField(cg, points);
-    } else if (drawType == styles.lines) {
-        FieldLines(cg, points);
-    } else if (drawType == styles.vectors) {
-        VectorField(cg, points);
-    } else if (drawType == styles.potential) {
-        PotentialField(cg, points);
-    }
+    getRenderer(drawType).render(cg, points);
 }
 
 function SelectedCharge() {
@@ -84,7 +93,7 @@ function SelectedCharge() {
 }
 
 function ElectricFields() {
-    this.style = styles.colors;
+    this.style = defaultStyle;
     this.charge = 1;
 
     this.selectedCharge = new SelectedCharge();
@@ -96,7 +105,7 @@ function ElectricFields() {
         createPointCharge(new PointCharge(new Vector(width / 2, height / 2), this.charge));
         this.select(points.length - 1);
         drawStuff();
-    };
+    }
     this.removeCharge = function removeCharge() {
         if (this.selectedChargeIndex < 0) return;
         if (this.selectedChargeIndex >= points.length) return;
@@ -131,10 +140,26 @@ window.onload = () => {
     const selectedCharge = new SelectedCharge();
     ef.selectedCharge = selectedCharge;
     const gui = new dat.GUI();
+    
+    let styleFolders = [];
 
     gui.add(ef, 'style', Object.keys(styles)).onFinishChange(() => {
+        Object.keys(styles).map(style => styleFolders[style].hide());
+        styleFolders[ef.style].show();
         drawStuff();
     });
+
+    styleFolders = Object.fromEntries(
+        Object.keys(styles).map(style => {
+            const folder = gui.addFolder(`${style} settings`);
+            getRenderer(style).setupGui(folder, debounce(100, () => drawStuff()));
+            folder.open();
+            folder.hide();
+            return [style, folder];
+        })
+    );
+    styleFolders[ef.style].show();
+
     gui.add(ef, 'charge', -10, 10);
     gui.add(ef, 'createCharge');
     gui.width = 400;
@@ -171,8 +196,8 @@ window.onload = () => {
     const x1 = width / 2 - width / 4;
     const x2 = width / 2 + width / 4;
     const y = height / 2;
-    createPointCharge(new P(new V(x1, y), 3));
-    createPointCharge(new P(new V(x2, y), -3));
+    createPointCharge(new P(new V(width / 2, y), 3));
+    // createPointCharge(new P(new V(x2, y), -3));
 
     drawStuff();
 };

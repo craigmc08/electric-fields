@@ -1,11 +1,13 @@
 import Vector from "../Vector";
 
+function setupGui() { }
+
 /**
  * 
  * @param {CanvasGraph} ctx 
  * @param {Vector[]} points 
  */
-export default function Render(cg, points) {
+function render(cg, points) {
     const ctx = cg.ctx;
     const { width, height } = ctx.canvas;
 
@@ -72,4 +74,9 @@ export default function Render(cg, points) {
 
     const image_data = new ImageData(pixels, width, height);
     ctx.putImageData(image_data, 0, 0);
+}
+
+export {
+    render,
+    setupGui
 }

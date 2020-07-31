@@ -1,3 +1,5 @@
+import { lerp } from './math/util';
+
 export default class Vector {
     /**
      * @constructor
@@ -108,6 +110,8 @@ export default class Vector {
      * @returns {Vector}
      */
     normalize() {
+        const mag = this.mag();
+        if (mag === 0) return Vector.zero;
         return this.scale(1 / this.mag());
     }
 
@@ -131,10 +135,43 @@ export default class Vector {
     }
 
     /**
+     * Lerps between two vectors
+     * @param {Vector} v1 
+     * @param {Vector} v2 
+     * @param {number} t 
+     * @returns {Vector}
+     */
+    static Lerp(v1, v2, t) {
+        return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t));
+    }
+
+    /**
      * Returns a copy of this vector
      * @returns {Vector}
      */
     copy() {
         return new Vector(this.x, this.y);
     }
+
+    /**
+     * Check equality of this vector with another value
+     * 
+     * @param {any} b
+     */
+    equals(b) {
+        if (typeof b !== 'object') return;
+        return this.x === b.x && this.y === b.y;
+    }
+
+    /**
+     * Check equality of two vectors
+     * 
+     * @param {Vector} v1 
+     * @param {Vector} v2 
+     */
+    static Equal(v1, v2) {
+        return v1.equals(v2);
+    }
 }
+
+Vector.zero = new Vector(0, 0);
